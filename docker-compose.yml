@@ -23,7 +23,10 @@ services:
       - OLLAMA_BASE_URL=http://ollama:11434
       - CHROMA_HOST=chromadb
       - CHROMA_PORT=8000
-      - MODEL_NAME=llama3.1:8b-instruct-q4_K_M # Ensure Ollama pulls this model
+      # - MODEL_NAME=llama3.1:8b-instruct-q4_K_M # Ensure Ollama pulls this model
+      # - MODEL_NAME=llama3:8b-instruct
+      # - MODEL_NAME=llama3:8b-instruct-q4_K_M # Ensure Ollama pulls this model
+      - MODEL_NAME=llama3 # Ensure Ollama pulls this model
       - CHROMA_COLLECTION_NAME=rag_collection # Used by app.py and ingest.py
     # Ensure ChromaDB and Ollama start before the Streamlit app attempts to connect
     depends_on:

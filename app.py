@@ -7,14 +7,28 @@ import json
 import time
 
 # --- Configuration ---
-# Get connection details from environment variables set in docker-compose
-OLLAMA_BASE_URL = os.getenv("http://localhost:11434", "OLLAMA_BASE_URL")
-CHROMA_HOST = os.getenv("CHROMA_HOST", "localhost")
-CHROMA_PORT = int(os.getenv("CHROMA_PORT", "8000"))
-MODEL_NAME = os.getenv("MODEL_NAME", "llama3.1:8b-instruct-q4_K_M") # Default model
+# # Get connection details from environment variables set in docker-compose
+# OLLAMA_BASE_URL = os.getenv("http://localhost:11434", "OLLAMA_BASE_URL")
+# CHROMA_HOST = os.getenv("CHROMA_HOST", "localhost")
+# CHROMA_PORT = int(os.getenv("CHROMA_PORT", "8000"))
+# MODEL_NAME = os.getenv("MODEL_NAME", "llama3.1:8b-instruct-q4_K_M") # Default model
 # DATA_DIR = "/app/data" # Directory where source data is mounted (used by ingest.py)
+# CHROMA_COLLECTION_NAME = os.getenv("CHROMA_COLLECTION_NAME", "rag_collection")
+# print("THIS is CHROMA_COLLECTION_NAME",CHROMA_COLLECTION_NAME,"\n")
+
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+CHROMA_HOST = os.getenv("CHROMA_HOST", "localhost")
+CHROMA_PORT = int(os.getenv("CHROMA_PORT", 8000))
+# MODEL_NAME = os.getenv("MODEL_NAME", "llama3.1:8b-instruct-q4_K_M")
+MODEL_NAME = os.getenv("MODEL_NAME")
+
 CHROMA_COLLECTION_NAME = os.getenv("CHROMA_COLLECTION_NAME", "rag_collection")
-print("THIS is CHROMA_COLLECTION_NAME",CHROMA_COLLECTION_NAME,"\n")
+
+
+print(f"[App] Connecting to Ollama at {OLLAMA_BASE_URL}")
+print(f"[App] Connecting to ChromaDB at {CHROMA_HOST}:{CHROMA_PORT}")
+print(f"[App] Using model {MODEL_NAME}")
+
 
 # --- Helper Functions ---
 
@@ -88,6 +102,17 @@ def query_chromadb(collection, query_text: str, n_results: int = 5):
         st.error(f"Error querying ChromaDB: {e}")
         return []
 
+
+def ollama_show_model(model: str):
+    """Ensures the model is loaded into Ollama memory."""
+    try:
+        response = requests.post(f"{OLLAMA_BASE_URL}/api/show", json={"name": model})
+        response.raise_for_status()
+        print(f"[Ollama] Model '{model}' loaded successfully.")
+    except Exception as e:
+        st.error(f"Failed to load model '{model}' into Ollama: {e}")
+
+
 def ollama_generate(model: str, prompt: str, context_docs: list = None):
     """Sends a request to the Ollama API and streams the response."""
     full_prompt = prompt
@@ -118,7 +143,10 @@ Answer:"""
         }
     }
     try:
-        response = requests.post(api_url, json=payload, stream=True, timeout=180) # Longer timeout
+        response = requests.post(f"{OLLAMA_BASE_URL}/api/generate", json=payload)
+        response = requests.post(f"{OLLAMA_BASE_URL}/api/generate", json=payload, stream=True, timeout=180)
+
+        # response = requests.post(api_url, json=payload, stream=True, timeout=180) # Longer timeout
         response.raise_for_status() # Raise an exception for bad status codes (4xx or 5xx)
 
         buffer = ""

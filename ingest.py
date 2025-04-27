@@ -1,5 +1,5 @@
 # ingest.py
-import os
+import os, requests
 import chromadb
 import time
 from langchain_community.document_loaders import DirectoryLoader, TextLoader, PyPDFLoader # Example loaders
