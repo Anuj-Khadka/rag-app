@@ -1,4 +1,3 @@
-# app.py
 import streamlit as st
 import chromadb
 import requests
@@ -8,20 +7,13 @@ import time
 
 # --- Configuration ---
 # # Get connection details from environment variables set in docker-compose
-# OLLAMA_BASE_URL = os.getenv("http://localhost:11434", "OLLAMA_BASE_URL")
-# CHROMA_HOST = os.getenv("CHROMA_HOST", "localhost")
-# CHROMA_PORT = int(os.getenv("CHROMA_PORT", "8000"))
-# MODEL_NAME = os.getenv("MODEL_NAME", "llama3.1:8b-instruct-q4_K_M") # Default model
 # DATA_DIR = "/app/data" # Directory where source data is mounted (used by ingest.py)
-# CHROMA_COLLECTION_NAME = os.getenv("CHROMA_COLLECTION_NAME", "rag_collection")
-# print("THIS is CHROMA_COLLECTION_NAME",CHROMA_COLLECTION_NAME,"\n")
 
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 CHROMA_HOST = os.getenv("CHROMA_HOST", "localhost")
 CHROMA_PORT = int(os.getenv("CHROMA_PORT", 8000))
 # MODEL_NAME = os.getenv("MODEL_NAME", "llama3.1:8b-instruct-q4_K_M")
 MODEL_NAME = os.getenv("MODEL_NAME")
-
 CHROMA_COLLECTION_NAME = os.getenv("CHROMA_COLLECTION_NAME", "rag_collection")
 
 
@@ -30,7 +22,6 @@ print(f"[App] Connecting to ChromaDB at {CHROMA_HOST}:{CHROMA_PORT}")
 print(f"[App] Using model {MODEL_NAME}")
 
 
-# --- Helper Functions ---
 
 @st.cache_resource(ttl=3600) # Cache the ChromaDB client connection for 1 hour
 def get_chroma_client():
@@ -41,7 +32,7 @@ def get_chroma_client():
         for _ in range(3): # Retry connection
             try:
                 client.heartbeat() #checks if the system is running correctly
-                st.success(f"Connected to ChromaDB at {CHROMA_HOST}:{CHROMA_PORT}")
+                # st.success(f"Connected to ChromaDB at {CHROMA_HOST}:{CHROMA_PORT}")
                 return client
             except Exception as e:
                 print(f"ChromaDB connection attempt failed: {e}")
@@ -62,26 +53,11 @@ def get_chroma_collection(_client: chromadb.Client, collection_name: str):
         # Get the collection. Assumes it was created by ingest.py
         # If using Chroma's auto-embedding, the embedding function is implicitly handled.
         collection = _client.get_collection(name=collection_name)
-        st.info(f"Successfully accessed ChromaDB collection: '{collection_name}'")
+        # st.info(f"Successfully accessed ChromaDB collection: '{collection_name}'")
         return collection
     except Exception as e:
         # Handle case where collection might not exist yet
         st.error(f"Failed to get ChromaDB collection '{collection_name}'. Was the ingestion script run successfully? Error: {e}")
-        # Optionally try to create it, but better to rely on ingest script
-        # try:
-        #     st.warning(f"Collection '{collection_name}' not found. Attempting to create...")
-        #     # Specify embedding function if Chroma handles embedding
-        #     # from chromadb.utils import embedding_functions
-        #     # default_ef = embedding_functions.DefaultEmbeddingFunction()
-        #     collection = _client.get_or_create_collection(
-        #           name=collection_name,
-        #           # embedding_function=default_ef # Uncomment if needed
-        #           )
-        #     st.info(f"Created collection '{collection_name}'. It might be empty.")
-        #     return collection
-        # except Exception as create_e:
-        #     st.error(f"Failed to create collection '{collection_name}': {create_e}")
-        #     return None
         return None # Explicitly return None if get fails
 
 def query_chromadb(collection, query_text: str, n_results: int = 5):
@@ -180,8 +156,8 @@ Answer:"""
 
 
 # --- Streamlit App UI ---
-st.set_page_config(layout="wide", page_title="RAG App")
-st.title("📚 RAG Application with LLaMA 3.1, ChromaDB, and Streamlit")
+st.set_page_config(layout="wide", page_title="InsightOS")
+st.title("🔍 InsightOS")
 st.markdown(f"Using Ollama model: **{MODEL_NAME}** | ChromaDB: `{CHROMA_HOST}:{CHROMA_PORT}` | Collection: `{CHROMA_COLLECTION_NAME}`")
 
 # Initialize clients and collection
@@ -211,6 +187,7 @@ st.sidebar.info(f"**Status:**\n{collection_status}")
 st.sidebar.header("Options")
 n_results = st.sidebar.slider("Number of relevant chunks to fetch:", 1, 10, 3, key="n_results_slider")
 use_rag = st.sidebar.toggle("Use RAG (fetch context from ChromaDB)", value=True, key="use_rag_toggle")
+
 
 st.header("Ask a Question")
 # Use session state to keep track of query
