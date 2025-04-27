@@ -51,6 +51,8 @@ Perfect for local knowledge bases, document search engines, or personal research
 - Clone the repository to your local machine:
 ```bash
 git clone https://github.com/Anuj-Khadka/insightos.git
+```
+```bash
 cd insightos
 ```
 - Make sure Docker and Docker Compose are installed on your machine.
@@ -60,4 +62,11 @@ cd insightos
 ```
 - Open your browser and navigate to `http://localhost:8501/`.
 
+
+## Features
+- 🔍 Context Retrieval: Fetches the most relevant document chunks from ChromaDB based on your question.
+- 🧠 Local LLM Integration: Generates AI-powered answers using locally hosted Ollama models.
+- ⚡ Real-time Streaming: Watch answers generate live while you type.
+- 🗂️ Flexible Document Base: Easily update or ingest new documents into ChromaDB.
+- 🛡️ Fully Local: Your data and AI stay on your machine — no external APIs required.
 
